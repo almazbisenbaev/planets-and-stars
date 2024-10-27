@@ -109,8 +109,8 @@ export default function Component() {
   const canvasRef = useCanvas(draw)
 
   return (
-    <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-white p-4">
-      <h1 className="text-3xl font-bold mb-8">Celestial Body Size Comparison</h1>
+    <div className="pt-10 pb-1 relative z-10 flex flex-col items-center justify-center min-h-screen text-white">
+      <h1 className="text-3xl text-center font-bold mb-8">How big is this planet?</h1>
       <div className="flex flex-wrap justify-center gap-4 mb-8">
 
         <Select onValueChange={(value) => setBody1(value as CelestialBody)} defaultValue={body1}>
@@ -148,14 +148,14 @@ export default function Component() {
       </div>
 
       <div className="planets-box">
-        <canvas ref={canvasRef} width={1200} height={600} className="planets-box-canvas" />
+        <canvas ref={canvasRef} width={1200} height={500} className="planets-box-canvas" />
       </div>
       
-      <div className="mt-4 text-center flex gap-10">
-        <p className="font-semibold">{body1}: {celestialBodies[body1].toLocaleString()} km</p>
-        <p className="font-semibold">{body2}: {celestialBodies[body2].toLocaleString()} km</p>
+      <div className="mt-4 flex justify-evenly gap-10 w-full">
+        <p className="text-xs text-center">{body1}: {celestialBodies[body1].toLocaleString()} km</p>
+        <p className="text-xs text-center">{body2}: {celestialBodies[body2].toLocaleString()} km</p>
       </div>
-      <p className="mt-8 text-sm text-gray-400 max-w-2xl text-center">
+      <p className="mt-20 lg:mt-10 text-sm text-gray-400 max-w-2xl text-center">
         Author: <a className="underline" target="_blank" href="https://x.com/almazbisenbaev">Almaz Bisenbaev</a>
       </p>
     </div>

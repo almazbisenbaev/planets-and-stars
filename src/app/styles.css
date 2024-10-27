@@ -3,6 +3,10 @@ body {
     /* background: #090a0f radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%); */
 }
 
+canvas {
+    max-width: 100%;
+}
+
 #stars-container {
     position: fixed;
     top: 0;
@@ -21,6 +25,16 @@ body {
 
     position: relative;
     z-index: 10;
+}
+
+@media (max-width: 767px){
+
+    .planets-box {
+        border: none;
+        background: transparent;
+        backdrop-filter: none;
+    }
+
 }
 
 #stars1 {
