@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import celestialBodies from './bodies'
 import celestialGroups from './bodies-groups'
@@ -18,35 +18,74 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
   })
 }
 
-const useCanvas = (draw: (ctx: CanvasRenderingContext2D, images: Record<CelestialBody, HTMLImageElement>) => void) => {
+const useCanvas = (draw: (ctx: CanvasRenderingContext2D, images: Record<string, HTMLImageElement>) => void, body1: string, body2: string) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [images, setImages] = useState<Record<CelestialBody, HTMLImageElement> | null>(null)
+  const [images, setImages] = useState<Record<string, HTMLImageElement>>({})
+  const imageCache = useRef<Record<string, HTMLImageElement>>({})
 
   useEffect(() => {
-    const loadAllImages = async () => {
-      const loadedImages: Partial<Record<CelestialBody, HTMLImageElement>> = {}
-      for (const [body, url] of Object.entries(celestialImages)) {
-        loadedImages[body as CelestialBody] = await loadImage(url)
+    const loadRequiredImages = async () => {
+      const requiredBodies = [body1, body2]
+      const newImages: Record<string, HTMLImageElement> = {}
+      
+      try {
+        for (const body of requiredBodies) {
+          if (!celestialImages[body]) {
+            console.error(`No image URL found for body: ${body}`)
+            return
+          }
+
+          if (!imageCache.current[body]) {
+            try {
+              console.log(`Loading image for ${body}: ${celestialImages[body]}`)
+              const img = await loadImage(celestialImages[body])
+              console.log(`Successfully loaded image for ${body}`)
+              imageCache.current[body] = img
+            } catch (error) {
+              console.error(`Failed to load image for ${body}:`, error)
+              return
+            }
+          }
+          newImages[body] = imageCache.current[body]
+        }
+        
+        // Verify we have both images before updating state
+        if (newImages[body1] && newImages[body2]) {
+          console.log('Setting images:', Object.keys(newImages))
+          setImages(newImages)
+        }
+      } catch (error) {
+        console.error('Error in loadRequiredImages:', error)
       }
-      setImages(loadedImages as Record<CelestialBody, HTMLImageElement>)
     }
 
-    loadAllImages()
-  }, [])
+    loadRequiredImages()
+  }, [body1, body2])
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !images) return
+    const context = canvas?.getContext('2d')
+    
+    if (!canvas || !context) return
+    
+    // Debug logging
+    console.log('Current images:', Object.keys(images))
+    console.log('Required bodies:', body1, body2)
+    console.log('Image checks:', {
+      hasBody1: !!images[body1],
+      hasBody2: !!images[body2],
+      isBody1HTMLImage: images[body1] instanceof HTMLImageElement,
+      isBody2HTMLImage: images[body2] instanceof HTMLImageElement
+    })
 
-    const context = canvas.getContext('2d')
-    if (!context) return
-
-    const render = () => {
+    // Only draw if we have valid images for both bodies
+    if (images[body1] instanceof HTMLImageElement && 
+        images[body2] instanceof HTMLImageElement) {
       draw(context, images)
+    } else {
+      console.error('Missing or invalid images for drawing')
     }
-
-    render()
-  }, [draw, images])
+  }, [draw, images, body1, body2])
 
   return canvasRef
 }
@@ -55,7 +94,7 @@ export default function Component() {
   const [body1, setBody1] = useState<CelestialBody>('Earth')
   const [body2, setBody2] = useState<CelestialBody>('Moon')
 
-  const draw = (ctx: CanvasRenderingContext2D, images: Record<CelestialBody, HTMLImageElement>) => {
+  const draw = useCallback((ctx: CanvasRenderingContext2D, images: Record<string, HTMLImageElement>) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     
     const maxRadius = Math.min(ctx.canvas.width, ctx.canvas.height) / 4
@@ -80,9 +119,9 @@ export default function Component() {
       size2,
       size2
     )
-  }
+  }, [body1, body2])
 
-  const canvasRef = useCanvas(draw)
+  const canvasRef = useCanvas(draw, body1, body2)
 
   return (
     <div className="pt-10 pb-1 relative z-10 flex flex-col items-center justify-center min-h-screen text-white">
