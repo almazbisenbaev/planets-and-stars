@@ -1,34 +1,52 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-// import { motion } from 'framer-motion'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-import celestialBodies from './bodies';
-import celestialGroups from './bodies-groups';
+import celestialBodies from './bodies'
+import celestialGroups from './bodies-groups'
+import celestialImages from './celestialImages'
 
 type CelestialBody = keyof typeof celestialBodies
 
-const useCanvas = (draw: (ctx: CanvasRenderingContext2D) => void) => {
+// Create an image loading utility
+const loadImage = (src: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = src
+  })
+}
+
+const useCanvas = (draw: (ctx: CanvasRenderingContext2D, images: Record<CelestialBody, HTMLImageElement>) => void) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [images, setImages] = useState<Record<CelestialBody, HTMLImageElement> | null>(null)
+
+  useEffect(() => {
+    const loadAllImages = async () => {
+      const loadedImages: Partial<Record<CelestialBody, HTMLImageElement>> = {}
+      for (const [body, url] of Object.entries(celestialImages)) {
+        loadedImages[body as CelestialBody] = await loadImage(url)
+      }
+      setImages(loadedImages as Record<CelestialBody, HTMLImageElement>)
+    }
+
+    loadAllImages()
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || !images) return
 
     const context = canvas.getContext('2d')
     if (!context) return
 
     const render = () => {
-      draw(context)
+      draw(context, images)
     }
 
     render()
-
-    return () => {
-      // Cleanup if needed
-    }
-  }, [draw])
+  }, [draw, images])
 
   return canvasRef
 }
@@ -37,23 +55,31 @@ export default function Component() {
   const [body1, setBody1] = useState<CelestialBody>('Earth')
   const [body2, setBody2] = useState<CelestialBody>('Moon')
 
-  const draw = (ctx: CanvasRenderingContext2D) => {
+  const draw = (ctx: CanvasRenderingContext2D, images: Record<CelestialBody, HTMLImageElement>) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     
     const maxRadius = Math.min(ctx.canvas.width, ctx.canvas.height) / 4
     const scale = maxRadius / Math.max(celestialBodies[body1], celestialBodies[body2])
     
-    ctx.fillStyle = 'white'
-    
     // Draw first body
-    ctx.beginPath()
-    ctx.arc(ctx.canvas.width / 4, ctx.canvas.height / 2, celestialBodies[body1] * scale, 0, Math.PI * 2)
-    ctx.fill()
+    const size1 = celestialBodies[body1] * scale * 2
+    ctx.drawImage(
+      images[body1],
+      ctx.canvas.width / 4 - size1 / 2,
+      ctx.canvas.height / 2 - size1 / 2,
+      size1,
+      size1
+    )
     
     // Draw second body
-    ctx.beginPath()
-    ctx.arc(ctx.canvas.width * 3 / 4, ctx.canvas.height / 2, celestialBodies[body2] * scale, 0, Math.PI * 2)
-    ctx.fill()
+    const size2 = celestialBodies[body2] * scale * 2
+    ctx.drawImage(
+      images[body2],
+      ctx.canvas.width * 3 / 4 - size2 / 2,
+      ctx.canvas.height / 2 - size2 / 2,
+      size2,
+      size2
+    )
   }
 
   const canvasRef = useCanvas(draw)
