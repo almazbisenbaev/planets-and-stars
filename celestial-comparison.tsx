@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo, useEffect, useRef, Suspense } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { ErrorBoundary } from "react-error-boundary"
 import type * as THREE from "three"
 
 // Celestial body data with detailed information
@@ -417,7 +418,8 @@ function Starfield() {
 
   const stars = useMemo(() => {
     const starArray = []
-    for (let i = 0; i < 2000; i++) {
+    for (let i = 0; i < 1000; i++) {
+      // Reduced from 2000 to 1000 for better performance
       const x = (Math.random() - 0.5) * 2000
       const y = (Math.random() - 0.5) * 2000
       const z = (Math.random() - 0.5) * 2000
@@ -497,7 +499,7 @@ function Scene({ body1, body2 }: { body1: string; body2: string }) {
       <CelestialBody bodyKey={body1} position={[-spacing / 2, 0, 0]} />
       <CelestialBody bodyKey={body2} position={[spacing / 2, 0, 0]} />
 
-      <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} enableRotate={true} />
+      <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} enableRotate={true} makeDefault />
     </>
   )
 }
@@ -512,7 +514,7 @@ function CelestialBodyModal({ bodyKey }: { bodyKey: string }) {
           {body.name}
         </button>
       </DialogTrigger>
-      <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="bg-black/20 backdrop-blur-md border-white/10 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl">
             <div className="w-6 h-6 rounded-full" style={{ backgroundColor: body.color }} />
@@ -567,9 +569,27 @@ function CelestialBodyModal({ bodyKey }: { bodyKey: string }) {
   )
 }
 
+// Fallback component for error boundary
+function FallbackComponent() {
+  return (
+    <div className="w-full h-screen flex items-center justify-center bg-black text-white">
+      <div className="text-center">
+        <h2 className="text-xl mb-4">Something went wrong with the 3D rendering</h2>
+        <p>Please refresh the page to try again</p>
+      </div>
+    </div>
+  )
+}
+
 export default function Component() {
   const [selectedBody1, setSelectedBody1] = useState<string>("earth")
   const [selectedBody2, setSelectedBody2] = useState<string>("mars")
+  const [mounted, setMounted] = useState(false)
+
+  // Only mount the Canvas after the component is mounted to avoid hydration issues
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const body1Data = celestialBodies[selectedBody1 as keyof typeof celestialBodies]
   const body2Data = celestialBodies[selectedBody2 as keyof typeof celestialBodies]
@@ -577,7 +597,7 @@ export default function Component() {
   return (
     <div className="w-full h-screen bg-black cursor-grab active:cursor-grabbing">
       <div className="absolute top-4 left-4 z-10 space-y-4">
-        <Card className="w-80 bg-gray-900 border-gray-700">
+        <Card className="w-80 bg-black/20 backdrop-blur-md border-white/10">
           <CardHeader>
             <CardTitle className="text-white">Celestial Body Comparison</CardTitle>
           </CardHeader>
@@ -616,7 +636,7 @@ export default function Component() {
           </CardContent>
         </Card>
 
-        <Card className="w-80 bg-gray-900 border-gray-700">
+        <Card className="w-80 bg-black/20 backdrop-blur-md border-white/10">
           <CardContent className="pt-6 space-y-3">
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: body1Data.color }} />
@@ -652,9 +672,19 @@ export default function Component() {
         </Card>
       </div>
 
-      <Canvas camera={{ position: [0, 0, 15], fov: 75 }}>
-        <Scene body1={selectedBody1} body2={selectedBody2} />
-      </Canvas>
+      {mounted && (
+        <ErrorBoundary FallbackComponent={FallbackComponent}>
+          <Canvas
+            camera={{ position: [0, 0, 15], fov: 75 }}
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+            frameloop="demand"
+          >
+            <Suspense fallback={null}>
+              <Scene body1={selectedBody1} body2={selectedBody2} />
+            </Suspense>
+          </Canvas>
+        </ErrorBoundary>
+      )}
     </div>
   )
 }
