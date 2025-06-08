@@ -497,7 +497,7 @@ function Scene({ body1, body2 }: { body1: string; body2: string }) {
       <CelestialBody bodyKey={body1} position={[-spacing / 2, 0, 0]} />
       <CelestialBody bodyKey={body2} position={[spacing / 2, 0, 0]} />
 
-      <OrbitControls ref={controlsRef} enablePan={true} enableZoom={true} enableRotate={true} />
+      <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} enableRotate={true} />
     </>
   )
 }
@@ -658,7 +658,6 @@ export default function Component() {
             <div className="text-sm text-gray-400">
               <div>🖱️ Drag to rotate</div>
               <div>🔍 Scroll to zoom</div>
-              <div>⚡ Right-click + drag to pan</div>
             </div>
           </CardContent>
         </Card>
