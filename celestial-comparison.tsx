@@ -652,17 +652,6 @@ export default function Component() {
         </Card>
       </div>
 
-      <div className="absolute bottom-4 right-4 z-10">
-        <Card className="bg-gray-900 border-gray-700">
-          <CardContent className="pt-6">
-            <div className="text-sm text-gray-400">
-              <div>🖱️ Drag to rotate</div>
-              <div>🔍 Scroll to zoom</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       <Canvas camera={{ position: [0, 0, 15], fov: 75 }}>
         <Scene body1={selectedBody1} body2={selectedBody2} />
       </Canvas>
