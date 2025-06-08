@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { ErrorBoundary } from "react-error-boundary"
-import type * as THREE from "three"
 
 // Celestial body data with detailed information
 const celestialBodies = {
@@ -414,12 +413,11 @@ const celestialBodies = {
 }
 
 function Starfield() {
-  const starsRef = useRef<THREE.Group>(null!)
+  const starsRef = useRef<any>(null)
 
   const stars = useMemo(() => {
     const starArray = []
     for (let i = 0; i < 1000; i++) {
-      // Reduced from 2000 to 1000 for better performance
       const x = (Math.random() - 0.5) * 2000
       const y = (Math.random() - 0.5) * 2000
       const z = (Math.random() - 0.5) * 2000
@@ -450,11 +448,44 @@ function CelestialBody({ bodyKey, position }: { bodyKey: string; position: [numb
     return Math.max(body.radius, 0.1) // Minimum size for visibility
   }, [body.radius])
 
+  // Determine if this is a star (self-luminous)
+  const isStar = body.details.type.toLowerCase().includes("star") || bodyKey === "sun"
+
+  // Determine if this is a black hole
+  const isBlackHole = bodyKey === "blackHole"
+
   return (
-    <mesh position={position}>
-      <sphereGeometry args={[displayRadius, 32, 32]} />
-      <meshStandardMaterial color={body.color} />
-    </mesh>
+    <group position={position}>
+      <mesh>
+        <sphereGeometry args={[displayRadius, 64, 64]} />
+        {isStar ? (
+          // Stars glow and emit light - use basic material for self-luminous objects
+          <meshBasicMaterial color={body.color} />
+        ) : isBlackHole ? (
+          // Black holes are completely dark with no reflection
+          <meshBasicMaterial color="#000000" transparent opacity={0.9} />
+        ) : (
+          // Planets and other bodies reflect light realistically
+          <meshStandardMaterial color={body.color} metalness={0.1} roughness={0.8} />
+        )}
+      </mesh>
+
+      {/* Add glow effect for stars */}
+      {isStar && (
+        <mesh>
+          <sphereGeometry args={[displayRadius * 1.1, 32, 32]} />
+          <meshBasicMaterial color={body.color} transparent opacity={0.1} />
+        </mesh>
+      )}
+
+      {/* Add accretion disk glow for black holes */}
+      {isBlackHole && (
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[displayRadius * 1.2, displayRadius * 2, 32]} />
+          <meshBasicMaterial color="#ff6600" transparent opacity={0.3} />
+        </mesh>
+      )}
+    </group>
   )
 }
 
@@ -492,9 +523,23 @@ function Scene({ body1, body2 }: { body1: string; body2: string }) {
     <>
       <Starfield />
 
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} />
+      {/* Ambient light for general illumination */}
+      <ambientLight intensity={0.2} />
+
+      {/* Main directional light (like sunlight) */}
+      <directionalLight
+        position={[10, 10, 10]}
+        intensity={1.5}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+
+      {/* Secondary fill light */}
+      <pointLight position={[-10, 5, 5]} intensity={0.5} color="#4080ff" />
+
+      {/* Rim light for dramatic effect */}
+      <pointLight position={[0, 0, -15]} intensity={0.3} color="#ffffff" />
 
       <CelestialBody bodyKey={body1} position={[-spacing / 2, 0, 0]} />
       <CelestialBody bodyKey={body2} position={[spacing / 2, 0, 0]} />
@@ -678,6 +723,7 @@ export default function Component() {
             camera={{ position: [0, 0, 15], fov: 75 }}
             style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
             frameloop="demand"
+            shadows
           >
             <Suspense fallback={null}>
               <Scene body1={selectedBody1} body2={selectedBody2} />
