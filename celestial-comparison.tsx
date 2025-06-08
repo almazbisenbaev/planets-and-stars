@@ -454,6 +454,51 @@ function CelestialBody({ bodyKey, position }: { bodyKey: string; position: [numb
   // Determine if this is a black hole
   const isBlackHole = bodyKey === "blackHole"
 
+  // Determine if this celestial body has rings
+  const hasRings = useMemo(() => {
+    return bodyKey === "saturn" || bodyKey === "jupiter" || bodyKey === "uranus" || bodyKey === "neptune"
+  }, [bodyKey])
+
+  // Get ring properties based on the body
+  const getRingProperties = useMemo(() => {
+    switch (bodyKey) {
+      case "saturn":
+        return {
+          innerRadius: displayRadius * 1.2,
+          outerRadius: displayRadius * 2.3,
+          color: "#D4AF37",
+          opacity: 0.6,
+          segments: 64,
+        }
+      case "jupiter":
+        return {
+          innerRadius: displayRadius * 1.1,
+          outerRadius: displayRadius * 1.4,
+          color: "#8B4513",
+          opacity: 0.2,
+          segments: 32,
+        }
+      case "uranus":
+        return {
+          innerRadius: displayRadius * 1.3,
+          outerRadius: displayRadius * 1.8,
+          color: "#4FD0E7",
+          opacity: 0.3,
+          segments: 32,
+        }
+      case "neptune":
+        return {
+          innerRadius: displayRadius * 1.2,
+          outerRadius: displayRadius * 1.6,
+          color: "#4B70DD",
+          opacity: 0.25,
+          segments: 32,
+        }
+      default:
+        return null
+    }
+  }, [bodyKey, displayRadius])
+
   return (
     <group position={position}>
       <mesh>
@@ -484,6 +529,56 @@ function CelestialBody({ bodyKey, position }: { bodyKey: string; position: [numb
           <ringGeometry args={[displayRadius * 1.2, displayRadius * 2, 32]} />
           <meshBasicMaterial color="#ff6600" transparent opacity={0.3} />
         </mesh>
+      )}
+
+      {/* Add rings for planets that have them */}
+      {hasRings && getRingProperties && (
+        <group>
+          {/* Main ring */}
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry
+              args={[getRingProperties.innerRadius, getRingProperties.outerRadius, getRingProperties.segments]}
+            />
+            <meshBasicMaterial
+              color={getRingProperties.color}
+              transparent
+              opacity={getRingProperties.opacity}
+              side={2}
+            />
+          </mesh>
+
+          {/* Saturn gets additional ring detail */}
+          {bodyKey === "saturn" && (
+            <>
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[displayRadius * 1.4, displayRadius * 1.6, 64]} />
+                <meshBasicMaterial color="#F5DEB3" transparent opacity={0.4} side={2} />
+              </mesh>
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[displayRadius * 1.7, displayRadius * 1.9, 64]} />
+                <meshBasicMaterial color="#DDD" transparent opacity={0.3} side={2} />
+              </mesh>
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[displayRadius * 2.0, displayRadius * 2.2, 64]} />
+                <meshBasicMaterial color="#C0C0C0" transparent opacity={0.2} side={2} />
+              </mesh>
+            </>
+          )}
+
+          {/* Uranus rings are tilted at 98 degrees */}
+          {bodyKey === "uranus" && (
+            <>
+              <mesh rotation={[Math.PI / 2, 0, Math.PI / 2]}>
+                <ringGeometry args={[displayRadius * 1.15, displayRadius * 1.25, 32]} />
+                <meshBasicMaterial color="#87CEEB" transparent opacity={0.15} side={2} />
+              </mesh>
+              <mesh rotation={[Math.PI / 2, 0, Math.PI / 2]}>
+                <ringGeometry args={[displayRadius * 1.35, displayRadius * 1.45, 32]} />
+                <meshBasicMaterial color="#B0E0E6" transparent opacity={0.1} side={2} />
+              </mesh>
+            </>
+          )}
+        </group>
       )}
     </group>
   )
