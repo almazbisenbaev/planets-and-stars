@@ -1,6 +1,7 @@
 "use client"
 
-import { useRef, useMemo, useEffect } from "react"
+import { useRef, useMemo, useEffect, useState } from "react"
+import { useFrame } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib"
 import type { CelestialBodyKey } from "../data/celestial-bodies"
@@ -15,6 +16,8 @@ interface SceneProps {
 
 export function Scene({ body1, body2 }: SceneProps) {
   const controlsRef = useRef<OrbitControlsImpl>(null!)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  const [autoRotationEnabled, setAutoRotationEnabled] = useState(true)
 
   // Calculate realistic scaling that maintains proportions
   const scalingData = useMemo(() => {
@@ -29,6 +32,43 @@ export function Scene({ body1, body2 }: SceneProps) {
       controlsRef.current.update()
     }
   }, [scalingData])
+
+  // Set up event listeners for user interaction detection
+  useEffect(() => {
+    const controls = controlsRef.current
+    if (!controls) return
+
+    const handleStart = () => {
+      if (!hasUserInteracted) {
+        setHasUserInteracted(true)
+        setAutoRotationEnabled(false)
+      }
+    }
+
+    // Listen for any control interaction
+    controls.addEventListener("start", handleStart)
+
+    return () => {
+      controls.removeEventListener("start", handleStart)
+    }
+  }, [hasUserInteracted])
+
+  // Reset auto-rotation when celestial bodies change
+  useEffect(() => {
+    setHasUserInteracted(false)
+    setAutoRotationEnabled(true)
+  }, [body1, body2])
+
+  // Auto-rotation animation
+  useFrame((state, delta) => {
+    console.log(delta);
+    if (autoRotationEnabled && controlsRef.current && !hasUserInteracted) {
+      // Slow, gentle rotation around Y-axis
+      controlsRef.current.object.position.x = Math.cos(state.clock.elapsedTime * 0.2) * scalingData.cameraDistance
+      controlsRef.current.object.position.z = Math.sin(state.clock.elapsedTime * 0.2) * scalingData.cameraDistance
+      controlsRef.current.update()
+    }
+  })
 
   return (
     <>
