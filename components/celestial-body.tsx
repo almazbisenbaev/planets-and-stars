@@ -7,17 +7,17 @@ import { hasRings, getRingProperties } from "../utils/ring-properties"
 interface CelestialBodyProps {
   bodyKey: CelestialBodyKey
   position: [number, number, number]
+  scaleFactor: number
 }
 
-export function CelestialBody({ bodyKey, position }: CelestialBodyProps) {
+export function CelestialBody({ bodyKey, position, scaleFactor }: CelestialBodyProps) {
   const body = celestialBodies[bodyKey]
 
-  // Scale down very large bodies for better visualization
+  // Use the provided scale factor for consistent scaling across the scene
   const displayRadius = useMemo(() => {
-    if (body.radius > 20) return Math.log(body.radius) * 2
-    if (body.radius > 5) return body.radius * 0.8
-    return Math.max(body.radius, 0.1) // Minimum size for visibility
-  }, [body.radius])
+    const scaledRadius = body.radius * scaleFactor
+    return Math.max(scaledRadius, 0.05) // Minimum visibility
+  }, [body.radius, scaleFactor])
 
   // Determine if this is a star (self-luminous)
   const isStar = body.details.type.toLowerCase().includes("star") || bodyKey === "sun"
