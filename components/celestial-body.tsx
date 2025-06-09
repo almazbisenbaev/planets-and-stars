@@ -59,23 +59,12 @@ export function CelestialBody({ bodyKey, position, displayRadius }: CelestialBod
         </mesh>
       )}
 
-      {/* Add rings for planets that have them */}
+      {/* Simple planetary rings */}
       {ringProps && (
-        <group>
-          {/* Main ring */}
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[ringProps.innerRadius, ringProps.outerRadius, ringProps.segments]} />
-            <meshBasicMaterial color={ringProps.color} transparent opacity={ringProps.opacity} side={2} />
-          </mesh>
-
-          {/* Additional rings */}
-          {ringProps.additionalRings.map((ring, index) => (
-            <mesh key={index} rotation={[Math.PI / 2, 0, ring.tilt ? Math.PI / 2 : 0]}>
-              <ringGeometry args={[ring.innerRadius, ring.outerRadius, ringProps.segments]} />
-              <meshBasicMaterial color={ring.color} transparent opacity={ring.opacity} side={2} />
-            </mesh>
-          ))}
-        </group>
+        <mesh rotation={[Math.PI / 2, 0, bodyKey === "uranus" ? Math.PI / 2 : 0]}>
+          <ringGeometry args={[ringProps.innerRadius, ringProps.outerRadius, ringProps.segments]} />
+          <meshBasicMaterial color={ringProps.color} transparent opacity={ringProps.opacity} side={2} />
+        </mesh>
       )}
     </group>
   )
