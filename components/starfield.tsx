@@ -8,7 +8,7 @@ export function Starfield() {
 
   const stars = useMemo(() => {
     const starArray = []
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 200; i++) {
       const x = (Math.random() - 0.5) * 2000
       const y = (Math.random() - 0.5) * 2000
       const z = (Math.random() - 0.5) * 2000
