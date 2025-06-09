@@ -19,6 +19,12 @@ export function CelestialBody({ bodyKey, position, displayRadius }: CelestialBod
   // Determine if this is a black hole
   const isBlackHole = bodyKey === "blackHole"
 
+  // Determine if this is a planet (reflects light)
+  const isPlanet =
+    body.details.type.toLowerCase().includes("planet") ||
+    body.details.type.toLowerCase().includes("satellite") ||
+    bodyKey === "moon"
+
   // Get ring properties if the body has rings
   const ringProps = useMemo(() => {
     if (hasRings(bodyKey)) {
@@ -43,11 +49,30 @@ export function CelestialBody({ bodyKey, position, displayRadius }: CelestialBod
         )}
       </mesh>
 
-      {/* Add glow effect for stars */}
+      {/* Add strong glow effect for stars */}
       {isStar && (
+        <>
+          <mesh>
+            <sphereGeometry args={[displayRadius * 1.1, 32, 32]} />
+            <meshBasicMaterial color={body.color} transparent opacity={0.2} />
+          </mesh>
+          <mesh>
+            <sphereGeometry args={[displayRadius * 1.2, 24, 24]} />
+            <meshBasicMaterial color={body.color} transparent opacity={0.1} />
+          </mesh>
+        </>
+      )}
+
+      {/* Add subtle atmospheric glow for planets */}
+      {isPlanet && !isBlackHole && (
         <mesh>
-          <sphereGeometry args={[displayRadius * 1.1, 32, 32]} />
-          <meshBasicMaterial color={body.color} transparent opacity={0.1} />
+          <sphereGeometry args={[displayRadius * 1.05, 32, 32]} />
+          <meshBasicMaterial
+            color={body.color}
+            transparent
+            opacity={0.08}
+            side={2} // DoubleSide to ensure visibility from all angles
+          />
         </mesh>
       )}
 
