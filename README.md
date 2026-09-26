@@ -1,6 +1,6 @@
-# Cosmos — planets-and-stars
+# Planets and Stars
 
-A Next.js App Router application for comparing 20 planets, moons, stars, and black holes in 3D. The application root is this `planets-and-stars` directory.
+A Next.js App Router application for comparing 20 planets, moons, stars, and black holes in 3D. The application now lives in the `planets-and-stars/` subfolder of the workspace. Run all npm commands from this directory, where `package.json` lives.
 
 ## Stack
 
@@ -43,7 +43,7 @@ app/
   page.jsx                  # App Router entry point
   globals.css               # Original responsive visual design
 components/
-  CosmosExplorer.jsx        # React state, controls, keyboard shortcuts, WebMCP
+  PlanetsAndStarsExplorer.jsx # React state, controls, keyboard shortcuts, WebMCP
   CelestialScene.jsx        # Browser-only renderer lifecycle
   ComparisonControls.jsx    # Body library, selected cards, comparison insights
   AboutDialog.jsx           # Data sources and scientific limitations

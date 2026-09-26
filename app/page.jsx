@@ -1,5 +1,5 @@
-import CosmosExplorer from "../components/CosmosExplorer";
+import PlanetsAndStarsExplorer from "../components/PlanetsAndStarsExplorer";
 
 export default function HomePage() {
-  return <CosmosExplorer />;
+  return <PlanetsAndStarsExplorer />;
 }

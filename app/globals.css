@@ -75,11 +75,13 @@ svg {
   text-decoration: none;
   color: var(--text);
   font-family: "Space Grotesk", sans-serif;
-  letter-spacing: 4px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
   font-weight: 600;
   font-size: 22px;
 }
 .brand svg {
+  flex: none;
   width: 39px;
   height: 39px;
   color: var(--accent);
@@ -96,6 +98,13 @@ svg {
   font-weight: 400;
   letter-spacing: 0;
   color: var(--muted);
+}
+@media (max-width: 380px) {
+  .brand-name {
+    max-width: 120px;
+    white-space: normal;
+    line-height: 1.1;
+  }
 }
 .header-right {
   display: flex;

@@ -13,7 +13,7 @@ import CelestialScene from "./CelestialScene";
 import AboutDialog from "./AboutDialog";
 import { CatalogBody, BodyCard, ComparisonInsight } from "./ComparisonControls";
 
-export default function CosmosExplorer() {
+export default function PlanetsAndStarsExplorer() {
   const [state, setState] = useState(INITIAL_STATE);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -180,7 +180,7 @@ export default function CosmosExplorer() {
   return (
     <>
       <header className="header">
-        <a className="brand" href="/" aria-label="Cosmos home">
+        <a className="brand" href="/" aria-label="Planets and Stars home">
           <svg viewBox="0 0 44 44" aria-hidden="true">
             <circle cx="22" cy="22" r="10" />
             <ellipse
@@ -191,7 +191,7 @@ export default function CosmosExplorer() {
               transform="rotate(-35 22 22)"
             />
           </svg>
-          <span>COSMOS</span>
+          <span className="brand-name">Planets and Stars</span>
           <span className="brand-divider"></span>
           <span className="brand-sub">A matter of scale</span>
         </a>
