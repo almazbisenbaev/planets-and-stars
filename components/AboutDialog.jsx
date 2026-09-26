@@ -34,8 +34,11 @@ export default function AboutDialog({ dialogRef, body }) {
           M and B abbreviate million and billion kilometres.</p>
 
       <p>
-        Planet diameters are equatorial; flattening and axial tilts are
-        included. Spin uses sidereal periods from{" "}
+        Solar System planet diameters are equatorial. Added moons use mean
+        diameters and spherical shapes; their axial tilts are not modeled.
+        Exoplanet radii use the{" "}
+        <a href="https://arxiv.org/abs/1510.07674" target="_blank" rel="noreferrer">IAU nominal Earth radius</a>
+        {" "}of 6,378.1 km. Measured spin uses sidereal periods from{" "}
         <a
           href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/"
           target="_blank"
@@ -47,6 +50,8 @@ export default function AboutDialog({ dialogRef, body }) {
         cloud drift are not modeled. Retrograde rotation is encoded by the
         tilted spin axis, without reversing it a second time. Starting
         longitudes and tilt directions are illustrative, not an ephemeris.
+        Triton uses a schematic retrograde axis. Exoplanet spin is left unmodeled
+        rather than inferred from an orbital period.
       </p>
       <p>
         The Sun uses a 695,700 km radius and a representative 609.12-hour
@@ -106,10 +111,11 @@ export default function AboutDialog({ dialogRef, body }) {
         <dl>
           {BODIES.filter((body) => body.source).map((body) => (
             <div key={body.id}>
-              <dt>{body.name} · ≈ {diameterText(body.diameter)}{body.type === "black-hole" ? " horizon" : ""}</dt>
+              <dt>{body.name} · {body.uncertain ? "≈ " : ""}{diameterText(body.diameter)}{body.type === "black-hole" ? " horizon" : ""}</dt>
               <dd>
                 {body.note}{" "}
                 <a href={body.source.url} target="_blank" rel="noreferrer">{body.source.label} ↗</a>
+                {body.rotationSource && <> · <a href={body.rotationSource.url} target="_blank" rel="noreferrer">Rotation data ↗</a></>}
                 {body.caveatSource && <> · <a href={body.caveatSource.url} target="_blank" rel="noreferrer">{body.caveatSource.label} ↗</a></>}
               </dd>
             </div>
@@ -141,6 +147,16 @@ export default function AboutDialog({ dialogRef, body }) {
         for illustration. Lighting, atmosphere glow and stellar brightness are
         adjusted for visibility.
       </p>
+      <p>
+        Added moon maps: NASA/JPL-Caltech/USGS, via the{" "}
+        <a href="https://space.jpl.nasa.gov/tmaps/" target="_blank" rel="noreferrer">JPL texture library</a>.
+        Io’s color composite and Titan’s haze illustration are by David Seal,
+        NASA/JPL-Caltech. Pluto: NASA/Johns Hopkins University Applied Physics
+        Laboratory/Southwest Research Institute. These older spacecraft mosaics
+        have variable resolution, grayscale regions and coverage gaps.
+        Exoplanet appearances are procedural illustrations, not resolved images.
+        <a href="/textures/ATTRIBUTION.md" target="_blank" rel="noreferrer"> Full map credits ↗</a>
+      </p>
       </details>
       <details className="data-section">
         <summary>Controls</summary>
@@ -161,7 +177,7 @@ function BodyFacts({ body }) {
   return (
     <div className="body-facts">
       <dl className="fact-grid">
-        <div><dt>{body.type === "black-hole" ? "Reference horizon" : "Diameter"}</dt><dd>{body.uncertain ? "≈ " : ""}{diameterText(body.diameter)}</dd></div>
+        <div><dt>{body.diameterKind || "Diameter"}</dt><dd>{body.uncertain ? "≈ " : ""}{diameterText(body.diameter)}</dd></div>
         <div><dt>Earth diameters</dt><dd>{(body.diameter / byId.earth.diameter).toLocaleString("en-US", { maximumSignificantDigits: 4 })}×</dd></div>
         {body.type === "black-hole" ? (
           <div><dt>Mass</dt><dd>≈ {body.solarMasses.toLocaleString("en-US")} Suns</dd></div>
@@ -172,10 +188,12 @@ function BodyFacts({ body }) {
           </>
         )}
       </dl>
+      {body.highlight && <p><strong>{body.highlight}</strong></p>}
       {body.note && <p>{body.note}</p>}
-      {body.illustrative && body.type !== "black-hole" && <p>Illustrative surface; rotation is not modeled.</p>}
+      {body.illustrative && body.type !== "black-hole" && <p>Illustrative appearance.{body.period == null ? " Rotation is not modeled." : ""}</p>}
       {body.type === "black-hole" && <p>Nonrotating horizon model. The rim is a visibility guide; lensing and accretion are not simulated.</p>}
       {body.source && <p><a href={body.source.url} target="_blank" rel="noreferrer">{body.source.label} ↗</a>{body.caveatSource && <> · <a href={body.caveatSource.url} target="_blank" rel="noreferrer">{body.caveatSource.label} ↗</a></>}</p>}
+      {body.rotationSource && <p><a href={body.rotationSource.url} target="_blank" rel="noreferrer">{body.rotationSource.label} ↗</a></p>}
     </div>
   );
 }

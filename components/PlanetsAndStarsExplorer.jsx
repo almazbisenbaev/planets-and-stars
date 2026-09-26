@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { BODIES, byId, speedNames } from "../lib/celestial-data.js";
+import { BODIES, byId, speedNames, matchesBodyFilter } from "../lib/celestial-data.js";
 import {
   INITIAL_STATE,
   comparisonSchema,
@@ -169,7 +169,7 @@ export default function PlanetsAndStarsExplorer() {
   const normalizeSearch = (text) => text.toLowerCase().replaceAll("biggest", "largest").replace(/[-*]/g, " ");
   const filteredBodies = BODIES.filter(
     (body) =>
-      (filter === "all" || body.type === filter) &&
+      matchesBodyFilter(body, filter) &&
       normalizeSearch(`${body.name} ${body.kind} ${body.highlight || ""}`)
         .includes(normalizeSearch(search).trim()),
   );
@@ -243,6 +243,13 @@ export default function PlanetsAndStarsExplorer() {
               onClick={() => setFilter("planet")}
             >
               Planets
+            </button>
+            <button
+              className={filter === "exoplanet" ? "active" : ""}
+              aria-pressed={filter === "exoplanet"}
+              onClick={() => setFilter("exoplanet")}
+            >
+              Exoplanets
             </button>
             <button
               className={filter === "star" ? "active" : ""}

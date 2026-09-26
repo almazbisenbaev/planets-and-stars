@@ -1693,6 +1693,18 @@ dialog h2 {
 .mobile-library-bar {
   display: none;
 }
+
+.exoplanet-thumb {
+  display: inline-block;
+  background: radial-gradient(circle at 30% 25%, #e2d7bd, var(--planet-color) 48%, #171c23 100%);
+  box-shadow: inset -7px -3px 11px #0008;
+}
+.exoplanet-thumb.lava {
+  background: repeating-conic-gradient(from 20deg at 65% 35%, #27201d 0deg 27deg, #e77d2e 31deg 34deg, #392721 39deg 68deg);
+}
+.exoplanet-thumb.cloudy {
+  background: repeating-linear-gradient(165deg, #779dad 0px, #bbced1 7px, #617e90 13px);
+}
 @media (max-width: 620px) {
   .mobile-library-bar {
     display: flex;

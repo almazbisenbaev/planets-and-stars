@@ -17,6 +17,8 @@ function statusLabel(body) {
 function BodyThumbnail({ body }) {
   if (body.type === "black-hole")
     return <span className="thumb black-hole-thumb" style={{ "--horizon-color": body.color }} aria-hidden="true" />;
+  if (body.type === "exoplanet")
+    return <span className={`thumb exoplanet-thumb ${body.appearance}`} style={{ "--planet-color": body.color }} aria-hidden="true" />;
   return (
     <Image
       className="thumb"
@@ -25,8 +27,8 @@ function BodyThumbnail({ body }) {
       height={38}
       unoptimized
       alt=""
-      style={body.illustrative ? {
-        filter: body.id.startsWith("sirius")
+      style={body.illustrative && body.type === "star" ? {
+        filter: body.id.startsWith("sirius") || body.id === "rigel"
           ? "grayscale(1) sepia(.15) hue-rotate(165deg)"
           : "sepia(.5) saturate(1.5)",
       } : undefined}

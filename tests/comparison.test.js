@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile, access } from "node:fs/promises";
-import { BODIES, byId, radiusFor, speeds, horizonDiameterKm, diameterText } from "../lib/celestial-data.js";
+import { BODIES, byId, radiusFor, speeds, horizonDiameterKm, diameterText, spinTiltDegrees, matchesBodyFilter } from "../lib/celestial-data.js";
+import { createHash } from "node:crypto";
 import {
   INITIAL_STATE,
   readComparison,
@@ -22,13 +23,13 @@ test("true scale preserves every physical diameter ratio, including extreme stel
 });
 
 test("retrograde periods match inverted spin axes; unknown stellar spins stay unmodeled", () => {
-  for (const body of BODIES.filter((body) => body.period !== null)) {
-    assert.equal(
-      Math.cos((body.tilt * Math.PI) / 180) < 0,
-      body.period < 0,
-      body.id,
-    );
-  }
+  for (const body of BODIES.filter((body) => body.period !== null))
+    for (const showTilt of [true, false])
+      assert.equal(
+        Math.cos((spinTiltDegrees(body, showTilt) * Math.PI) / 180) < 0,
+        body.period < 0,
+        `${body.id}, tilt ${showTilt}`,
+      );
   assert.equal(byId.sirius.period, null);
   assert.equal(byId.betelgeuse.period, null);
   assert.equal(speeds[0], 1);
@@ -89,6 +90,36 @@ test("every surface map and attribution is available under Next public assets", 
     "utf8",
   );
   assert.match(attribution, /creativecommons\.org\/licenses\/by\/4\.0/);
+  const manifest = JSON.parse(await readFile(new URL("../public/textures/catalog-attribution.json", import.meta.url), "utf8"));
+  for (const asset of manifest.assets) {
+    const bytes = await readFile(new URL(`../public/textures/${asset.file}`, import.meta.url));
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), asset.sha256, asset.file);
+    assert.equal(asset.size[0], asset.size[1] * 2, `${asset.file} projection`);
+    assert.ok(asset.credit && asset.source_page);
+  }
+});
+
+test("expanded catalog has valid dimensions, discoverable types and no invented exoplanet spins", () => {
+  assert.equal(new Set(BODIES.map(body => body.id)).size, BODIES.length);
+  for (const body of BODIES) {
+    assert.ok(Number.isFinite(body.diameter) && body.diameter > 0, body.id);
+    assert.ok(body.texture || body.type === "black-hole" || body.appearance, body.id);
+  }
+  assert.ok(matchesBodyFilter(byId.pluto, "planet"));
+  assert.ok(matchesBodyFilter(byId["trappist-1-e"], "exoplanet"));
+  assert.equal(matchesBodyFilter(byId["trappist-1-e"], "star"), false);
+  assert.ok(byId.ganymede.diameter > byId.mercury.diameter);
+  assert.ok(byId.titan.diameter > byId.mercury.diameter);
+  assert.ok(byId.mimas.diameter < byId.enceladus.diameter);
+  for (const body of BODIES.filter(body => body.type === "exoplanet")) {
+    assert.equal(body.diameter, body.earthRadii * 12756.2);
+    assert.equal(body.period, null);
+    assert.equal(body.tilt, null);
+    assert.equal(body.illustrative, true);
+  }
+  assert.equal(byId.triton.tilt, null);
+  assert.equal(spinTiltDegrees(byId.triton, true), 180);
+  assert.ok(Math.abs(byId["cygnus-x-1"].diameter - 125.2188) < 0.001);
 });
 
 test("black hole diameters use the nonrotating horizon, not the radius or shadow", () => {

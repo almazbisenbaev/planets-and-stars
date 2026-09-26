@@ -4,7 +4,7 @@ export const metadata = {
   title: "Planets and Stars",
   applicationName: "Planets and Stars",
   description:
-    "Explore Planets and Stars: compare planets, moons, stars and black holes in a textured, interactive 3D size laboratory.",
+    "Explore Planets and Stars: compare planets, exoplanets, moons, stars and black holes in a textured, interactive 3D size laboratory.",
   icons: { icon: "/favicon.svg" },
 };
 
