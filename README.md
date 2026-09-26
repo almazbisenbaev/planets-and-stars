@@ -65,7 +65,7 @@ npm test
 npm run build
 ```
 
-The tests cover every pairwise size ratio, equal-size mode, reference horizon calculations, retrograde conventions, unknown stellar spin, invalid comparison requests, and the presence of texture assets and licensing. Browser checks cover React hydration, a single live canvas, control interactions and a mobile viewport.
+The tests cover every pairwise size ratio, reference horizon calculations, retrograde conventions, unknown stellar spin, invalid comparison requests, and the presence of texture assets and licensing. Browser checks cover React hydration, a single live canvas, control interactions and a mobile viewport.
 
 ## Scientific conventions
 
@@ -79,7 +79,7 @@ The new catalog includes Proxima Centauri, Sirius B, UY Scuti, Stephenson 2-18, 
 
 Black hole sizes are Schwarzschild reference horizon diameters, D = 4GM/c², using the IAU nominal solar mass parameter 1.3271244e20 m³/s² and c = 299792458 m/s. These are nonrotating reference spheres, not the larger shadow diameter. Their faint edge is only a visibility guide. Accretion, lensing, and black hole spin are not simulated. Every new object includes its measurement source and interpretation in `lib/celestial-data.js`, the Details panel, and Data & help.
 
-At extreme ratios, small bodies can be smaller than one pixel. They retain their true size; use their card to focus or switch to Equal size. Focus translates and rescales the entire comparison in double precision before rendering, keeping the selected object inspectable even across the roughly 25-billion-fold diameter range. The ruler uses the same conversion. Equal size intentionally does not preserve physical ratios.
+At extreme ratios, small bodies can be smaller than one pixel. They retain their true size; use their card to focus. Focus translates and rescales the entire comparison in double precision before rendering, keeping the selected object inspectable even across the roughly 25-billion-fold diameter range. The ruler uses the same conversion. All comparisons use true scale.
 
 ## Sources
 
@@ -92,6 +92,6 @@ At extreme ratios, small bodies can be smaller than one pixel. They retain their
 
 ## Controls
 
-Drag to orbit; wheel/pinch to zoom; right-drag or two fingers to pan. Click a body or card to focus. Body labels are hidden by default and can be enabled in Display settings. F fits all objects; Space pauses rotation; / focuses search. Solar system, Giant stars, and Black hole extremes are available from the Presets menu. Select a card, then Details, for rotation data, full-size measurements and sources; Data & help contains expandable scientific notes and controls. Native controls are keyboard accessible; prefers-reduced-motion starts with rotation paused.
+Drag to orbit; wheel/pinch to zoom; right-drag or two fingers to pan. Click a body or card to focus. Body labels are hidden by default and can be enabled in Display settings. F fits all objects; Space pauses rotation; / focuses search. Select a card, then Details, for rotation data, full-size measurements and sources; Data & help contains expandable scientific notes and controls. Native controls are keyboard accessible; prefers-reduced-motion starts with rotation paused.
 
 Optional browser WebMCP tools: `read_comparison` and `compare_bodies`. Unsupported browsers continue normally.

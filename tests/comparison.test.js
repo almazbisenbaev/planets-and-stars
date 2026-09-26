@@ -13,14 +13,10 @@ test("true scale preserves every physical diameter ratio, including extreme stel
     for (const second of BODIES) {
       const pair = [first, second];
       const actual =
-        radiusFor(first, pair, "true") / radiusFor(second, pair, "true");
+        radiusFor(first, pair) / radiusFor(second, pair);
       assert.ok(
         Math.abs(actual / (first.diameter / second.diameter) - 1) < 1e-12,
         `${first.id} / ${second.id}`,
-      );
-      assert.equal(
-        radiusFor(first, pair, "equal"),
-        radiusFor(second, pair, "equal"),
       );
     }
 });
@@ -40,10 +36,10 @@ test("retrograde periods match inverted spin axes; unknown stellar spins stay un
 });
 
 test("comparison configuration validates before changing state and copies caller-owned arrays", () => {
-  const input = { bodyIds: ["earth", "moon"], sizeMode: "equal" };
+  const input = { bodyIds: ["earth", "moon"] };
   const patch = validateComparison(input);
   input.bodyIds.push("sun");
-  assert.deepEqual(patch, { selected: ["earth", "moon"], mode: "equal" });
+  assert.deepEqual(patch, { selected: ["earth", "moon"] });
   const snapshot = readComparison({
     ...INITIAL_STATE,
     ...patch,
@@ -53,7 +49,7 @@ test("comparison configuration validates before changing state and copies caller
     snapshot.bodies.map((body) => body.id),
     ["earth", "moon"],
   );
-  assert.equal(snapshot.sizeMode, "equal");
+  assert.equal(snapshot.sizeMode, "true");
   assert.equal(snapshot.simulatedSecondsPerSecond, 3600);
 });
 
@@ -67,7 +63,7 @@ test("invalid and oversized comparisons are rejected without corrupting the init
     { bodyIds: ["unknown"] },
     { bodyIds: ["__proto__"] },
     { bodyIds: BODIES.slice(0, 7).map((body) => body.id) },
-    { bodyIds: ["earth"], sizeMode: "huge" },
+    { bodyIds: ["earth"], sizeMode: "equal" },
     { bodyIds: ["earth"], extra: true },
   ]) {
     assert.throws(() => validateComparison(invalid));

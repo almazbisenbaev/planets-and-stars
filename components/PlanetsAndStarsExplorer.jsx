@@ -43,8 +43,8 @@ export default function PlanetsAndStarsExplorer() {
   }, []);
 
   const changeSelection = useCallback(
-    (selected, mode) => {
-      update({ selected, ...(mode ? { mode } : {}) });
+    (selected) => {
+      update({ selected });
       setFocusedId(null);
     },
     [update],
@@ -123,7 +123,7 @@ export default function PlanetsAndStarsExplorer() {
         name: "read_comparison",
         title: "Read celestial comparison",
         description:
-          "Read the bodies, physical data, scale mode, and rotation speed currently shown.",
+          "Read the bodies, physical data, and rotation speed currently shown.",
         inputSchema: {
           type: "object",
           properties: {},
@@ -136,12 +136,12 @@ export default function PlanetsAndStarsExplorer() {
         name: "compare_bodies",
         title: "Compare celestial bodies",
         description:
-          "Replace the visible comparison with one to six bodies, optionally choosing true scale or equal size. Does not change external data.",
+          "Replace the visible comparison with one to six bodies at true scale. Does not change external data.",
         inputSchema: comparisonSchema,
         annotations: { readOnlyHint: false, untrustedContentHint: false },
         async execute(input) {
           const patch = validateComparison(input);
-          flushSync(() => changeSelection(patch.selected, patch.mode));
+          flushSync(() => changeSelection(patch.selected));
           await new Promise(requestAnimationFrame);
           return readComparison(stateRef.current);
         },
@@ -283,9 +283,8 @@ export default function PlanetsAndStarsExplorer() {
             )}
           </div>
         </aside>
-        <main className="workspace">
-          <div className="workspace-heading">
-            <h1>Compare</h1>
+        <main className="workspace" aria-label="Celestial comparison">
+          <div className="mobile-library-bar">
             <button
               className="mobile-library"
               id="library-toggle"
@@ -294,28 +293,6 @@ export default function PlanetsAndStarsExplorer() {
             >
               ＋ Add bodies
             </button>
-            <div className="scale-switch" role="group" aria-label="Size mode">
-              <button
-                className={state.mode === "true" ? "active" : ""}
-                aria-pressed={state.mode === "true"}
-                onClick={() => {
-                  update({ mode: "true" });
-                  setFocusedId(null);
-                }}
-              >
-                True scale
-              </button>
-              <button
-                className={state.mode === "equal" ? "active" : ""}
-                aria-pressed={state.mode === "equal"}
-                onClick={() => {
-                  update({ mode: "equal" });
-                  setFocusedId(null);
-                }}
-              >
-                Equal size
-              </button>
-            </div>
           </div>
           <section
             className="viewport"
@@ -328,9 +305,6 @@ export default function PlanetsAndStarsExplorer() {
               onFocus={recordFocus}
               onWarning={showToast}
             />
-            {state.mode === "equal" && (
-              <div className="scene-caption" id="scale-caption">Not to scale</div>
-            )}
             <div className="scene-tools">
               <button
                 id="fit"
@@ -420,24 +394,6 @@ export default function PlanetsAndStarsExplorer() {
                 {state.selected.length} / 6
               </span>
               <div className="tray-actions">
-                <select
-                  className="preset-select"
-                  aria-label="Load a preset"
-                  value=""
-                  onChange={(event) => {
-                    const presets = {
-                      solar: ["mercury", "venus", "earth", "mars", "jupiter", "saturn"],
-                      stars: ["earth", "sun", "uy-scuti", "stephenson-2-18"],
-                      holes: ["gw190814", "sagittarius-a", "m87", "ton-618"],
-                    };
-                    if (presets[event.target.value]) changeSelection(presets[event.target.value], "true");
-                  }}
-                >
-                  <option value="" disabled>Presets</option>
-                  <option value="solar">Solar system</option>
-                  <option value="stars">Giant stars</option>
-                  <option value="holes">Black hole extremes</option>
-                </select>
                 <button
                   id="clear"
                   onClick={() => changeSelection([])}
@@ -467,7 +423,6 @@ export default function PlanetsAndStarsExplorer() {
             <div className="insight" id="insight">
               <ComparisonInsight
                 bodies={selectedBodies}
-                mode={state.mode}
                 focusedId={focusedId}
                 onDetails={openDetails}
               />

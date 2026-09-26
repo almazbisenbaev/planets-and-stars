@@ -30,7 +30,7 @@ export default function AboutDialog({ dialogRef, body }) {
       )}
       <details className="data-section">
         <summary>Sizes & rotation</summary>
-        <p>True scale preserves diameter ratios; equal size is for inspecting surfaces.
+        <p>All comparisons preserve physical diameter ratios.
           M and B abbreviate million and billion kilometres.</p>
 
       <p>
@@ -148,8 +148,7 @@ export default function AboutDialog({ dialogRef, body }) {
         Drag to orbit in any direction, scroll or pinch to zoom, and right-drag
         or use two fingers to pan. Click a body or its comparison card to focus.
         Press <kbd>F</kbd> to fit everything, <kbd>Space</kbd> to pause, or{" "}
-        <kbd>/</kbd> to search. Equal size mode helps inspect surface detail,
-        but does not preserve size ratios. Body labels start hidden; enable
+        <kbd>/</kbd> to search. Body labels start hidden; enable
         them under Display settings. Very small objects retain their true sizes
         even below one pixel; select their cards to inspect them up close.
       </p>

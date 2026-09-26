@@ -82,7 +82,7 @@ export function BodyCard({ body, focused, onFocus, onRemove }) {
   );
 }
 
-export function ComparisonInsight({ bodies, focusedId, mode, onDetails }) {
+export function ComparisonInsight({ bodies, focusedId, onDetails }) {
   if (!bodies.length) return null;
   const sorted = [...bodies].sort((a, b) => a.diameter - b.diameter);
   const small = sorted[0], large = sorted.at(-1);
@@ -96,7 +96,7 @@ export function ComparisonInsight({ bodies, focusedId, mode, onDetails }) {
         ) : (
           <><strong>{large.name}</strong> is <strong>{bodies.some(body => body.uncertain) ? "≈ " : ""}{ratio.toLocaleString("en-US", { maximumFractionDigits: 1, ...(ratio >= 1e6 ? { notation: "compact" } : {}) })}×</strong> wider than {small.name}.</>
         )}
-        {!detailBody && mode === "true" && ratio > 1000 && (
+        {!detailBody && ratio > 1000 && (
           <span className="tiny-body-hint">Select a card to inspect tiny bodies.</span>
         )}
       </span>
