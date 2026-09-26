@@ -77,7 +77,7 @@ All distant stars use tinted solar surface maps as illustrations. They are stati
 
 The new catalog includes Proxima Centauri, Sirius B, UY Scuti, Stephenson 2-18, the GW190814 companion, Sagittarius A*, M87*, and TON 618. Record contenders carry explicit caveats. Stephenson 2-18's illustrative 2,150-solar-radius estimate is inferred from Fok et al. (2012), table 8 (log L/Lsun = 5.64, Teff = 3200 K), with disputed distance/membership. GW190814's 2.6-solar-mass companion could be a neutron star; its modeled horizon applies only if it was a black hole. TON 618 uses NASA's quoted 66-billion-solar-mass estimate, without claiming a settled record.
 
-Black hole sizes are Schwarzschild reference horizon diameters, D = 4GM/c², using the IAU nominal solar mass parameter 1.3271244e20 m³/s² and c = 299792458 m/s. These are nonrotating reference spheres, not the larger shadow diameter. Their faint edge is only a visibility guide. Accretion, lensing, and black hole spin are not simulated. Every new object includes its measurement source and interpretation in `lib/celestial-data.js`, the focused card insight, and About the data.
+Black hole sizes are Schwarzschild reference horizon diameters, D = 4GM/c², using the IAU nominal solar mass parameter 1.3271244e20 m³/s² and c = 299792458 m/s. These are nonrotating reference spheres, not the larger shadow diameter. Their faint edge is only a visibility guide. Accretion, lensing, and black hole spin are not simulated. Every new object includes its measurement source and interpretation in `lib/celestial-data.js`, the Details panel, and Data & help.
 
 At extreme ratios, small bodies can be smaller than one pixel. They retain their true size; use their card to focus or switch to Equal size. Focus translates and rescales the entire comparison in double precision before rendering, keeping the selected object inspectable even across the roughly 25-billion-fold diameter range. The ruler uses the same conversion. Equal size intentionally does not preserve physical ratios.
 
@@ -92,6 +92,6 @@ At extreme ratios, small bodies can be smaller than one pixel. They retain their
 
 ## Controls
 
-Drag to orbit; wheel/pinch to zoom; right-drag or two fingers to pan. Click a body or card to focus. Body labels are hidden by default and can be enabled in Display settings. F fits all objects; Space pauses rotation; / focuses search. Giant stars and Black hole extremes presets are available in the comparison tray. Native controls are keyboard accessible; prefers-reduced-motion starts with rotation paused.
+Drag to orbit; wheel/pinch to zoom; right-drag or two fingers to pan. Click a body or card to focus. Body labels are hidden by default and can be enabled in Display settings. F fits all objects; Space pauses rotation; / focuses search. Solar system, Giant stars, and Black hole extremes are available from the Presets menu. Select a card, then Details, for rotation data, full-size measurements and sources; Data & help contains expandable scientific notes and controls. Native controls are keyboard accessible; prefers-reduced-motion starts with rotation paused.
 
 Optional browser WebMCP tools: `read_comparison` and `compare_bodies`. Unsupported browsers continue normally.

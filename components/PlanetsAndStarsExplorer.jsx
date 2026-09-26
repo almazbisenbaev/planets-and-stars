@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { BODIES, byId, speedNames, bodyDetails } from "../lib/celestial-data.js";
+import { BODIES, byId, speedNames } from "../lib/celestial-data.js";
 import {
   INITIAL_STATE,
   comparisonSchema,
@@ -21,6 +21,7 @@ export default function PlanetsAndStarsExplorer() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [focusedId, setFocusedId] = useState(null);
   const [toast, setToast] = useState("");
+  const [detailsId, setDetailsId] = useState(null);
   const stateRef = useRef(INITIAL_STATE);
   const sceneRef = useRef(null);
   const aboutRef = useRef(null);
@@ -61,16 +62,12 @@ export default function PlanetsAndStarsExplorer() {
     [changeSelection, showToast],
   );
 
-  const recordFocus = useCallback(
-    (id) => {
-      setFocusedId(id);
-      const body = byId[id];
-      showToast(
-        `${body.name} · ${bodyDetails(body)}`,
-      );
-    },
-    [showToast],
-  );
+  const recordFocus = useCallback((id) => setFocusedId(id), []);
+  const openDetails = useCallback((id = null) => {
+    setDetailsId(id);
+    aboutRef.current.showModal();
+    aboutRef.current.scrollTop = 0;
+  }, []);
   const focusBody = useCallback((id) => sceneRef.current?.focus(id), []);
   const fitView = useCallback(() => {
     sceneRef.current?.fit();
@@ -192,26 +189,21 @@ export default function PlanetsAndStarsExplorer() {
             />
           </svg>
           <span className="brand-name">Planets and Stars</span>
-          <span className="brand-divider"></span>
-          <span className="brand-sub">A matter of scale</span>
         </a>
         <div className="header-right">
-          <span className="eyebrow desktop-label">
-            AN INTERACTIVE SIZE EXPLORER
-          </span>
           <button
             id="about"
-            onClick={() => aboutRef.current.showModal()}
+            onClick={() => openDetails()}
             className="text-button"
           >
-            <span className="info-icon">i</span> About the data
+            <span className="info-icon" aria-hidden="true">i</span> Data & help
           </button>
         </div>
       </header>
       <div className="app-shell">
         <aside className={`library${libraryOpen ? " open" : ""}`} id="library">
           <div className="library-title">
-            <h2>Celestial library</h2>
+            <h2>Bodies</h2>
             <span className="count">{BODIES.length}</span>
             <button
               id="close-library"
@@ -221,9 +213,6 @@ export default function PlanetsAndStarsExplorer() {
               ×
             </button>
           </div>
-          <p className="muted library-intro">
-            Choose a world. Find your perspective.
-          </p>
           <label className="search">
             <svg viewBox="0 0 24 24">
               <circle cx="10.5" cy="10.5" r="6.5" />
@@ -235,7 +224,7 @@ export default function PlanetsAndStarsExplorer() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               type="search"
-              placeholder="Find a celestial body…"
+              placeholder="Search bodies…"
               aria-label="Search celestial bodies"
             />
             <kbd>/</kbd>
@@ -289,35 +278,14 @@ export default function PlanetsAndStarsExplorer() {
               ))
             ) : (
               <p className="empty-message">
-                No bodies found. Try a different name or category.
+                No matches.
               </p>
             )}
-          </div>
-          <div className="library-foot">
-            <span className="small-orbit">◉</span>
-            <span>
-              Based on astronomical data.
-              <br />
-              <strong>Explore the sources.</strong>
-            </span>
-            <button
-              id="help"
-              onClick={() => aboutRef.current.showModal()}
-              aria-label="View controls and data information"
-            >
-              ↗
-            </button>
           </div>
         </aside>
         <main className="workspace">
           <div className="workspace-heading">
-            <div>
-              <div className="eyebrow section-label">THE COMPARISON LAB</div>
-              <h1>The universe, side by side.</h1>
-              <p className="muted">
-                Explore the extraordinary difference in size.
-              </p>
-            </div>
+            <h1>Compare</h1>
             <button
               className="mobile-library"
               id="library-toggle"
@@ -360,16 +328,9 @@ export default function PlanetsAndStarsExplorer() {
               onFocus={recordFocus}
               onWarning={showToast}
             />
-            <div className="scene-caption">
-              <span className="status-dot"></span>
-              <span id="scale-caption">
-                {state.mode === "true"
-                  ? "SIZES TO SCALE"
-                  : "EQUAL SIZE · NOT TO SCALE"}
-              </span>
-              <span className="caption-divider">/</span>
-              <span>SPACING ILLUSTRATIVE</span>
-            </div>
+            {state.mode === "equal" && (
+              <div className="scene-caption" id="scale-caption">Not to scale</div>
+            )}
             <div className="scene-tools">
               <button
                 id="fit"
@@ -383,7 +344,7 @@ export default function PlanetsAndStarsExplorer() {
               </button>
               <button
                 id="front"
-                onClick={() => sceneRef.current?.front()}
+                onClick={() => { sceneRef.current?.front(); setFocusedId(null); }}
                 aria-label="Reset to front view"
                 title="Front view"
               >
@@ -451,62 +412,38 @@ export default function PlanetsAndStarsExplorer() {
                   <option value="flat">Full illumination</option>
                 </select>
               </label>
-              <p>
-                Studio light reveals surface detail. Sunlight shows a stronger
-                day–night boundary.
-              </p>
             </div>
           </section>
           <section className="comparison-tray">
             <div className="tray-heading">
-              <div className="eyebrow">
-                IN YOUR COMPARISON{" "}
-                <span id="selected-count">
-                  {String(state.selected.length).padStart(2, "0")} / 06
-                </span>
-              </div>
+              <span id="selected-count" aria-label={`${state.selected.length} of 6 bodies selected`}>
+                {state.selected.length} / 6
+              </span>
               <div className="tray-actions">
-                <button
-                  onClick={() => changeSelection(
-                    ["earth", "sun", "uy-scuti", "stephenson-2-18"], "true",
-                  )}
-                  className="text-button"
+                <select
+                  className="preset-select"
+                  aria-label="Load a preset"
+                  value=""
+                  onChange={(event) => {
+                    const presets = {
+                      solar: ["mercury", "venus", "earth", "mars", "jupiter", "saturn"],
+                      stars: ["earth", "sun", "uy-scuti", "stephenson-2-18"],
+                      holes: ["gw190814", "sagittarius-a", "m87", "ton-618"],
+                    };
+                    if (presets[event.target.value]) changeSelection(presets[event.target.value], "true");
+                  }}
                 >
-                  Giant stars
-                </button>
-                <button
-                  onClick={() => changeSelection(
-                    ["gw190814", "sagittarius-a", "m87", "ton-618"], "true",
-                  )}
-                  className="text-button"
-                >
-                  Black hole extremes
-                </button>
-                <button
-                  id="preset"
-                  onClick={() =>
-                    changeSelection(
-                      [
-                        "mercury",
-                        "venus",
-                        "earth",
-                        "mars",
-                        "jupiter",
-                        "saturn",
-                      ],
-                      "true",
-                    )
-                  }
-                  className="text-button"
-                >
-                  ↺ Solar system
-                </button>
+                  <option value="" disabled>Presets</option>
+                  <option value="solar">Solar system</option>
+                  <option value="stars">Giant stars</option>
+                  <option value="holes">Black hole extremes</option>
+                </select>
                 <button
                   id="clear"
                   onClick={() => changeSelection([])}
                   className="text-button"
                 >
-                  Clear all
+                  Clear
                 </button>
               </div>
             </div>
@@ -517,13 +454,13 @@ export default function PlanetsAndStarsExplorer() {
                     key={body.id}
                     body={body}
                     onFocus={focusBody}
+                    focused={focusedId === body.id}
                     onRemove={toggleBody}
                   />
                 ))
               ) : (
                 <div className="empty-tray">
-                  Your universe starts here. Add a body from the celestial
-                  library.
+                  Add a body to start.
                 </div>
               )}
             </div>
@@ -532,6 +469,7 @@ export default function PlanetsAndStarsExplorer() {
                 bodies={selectedBodies}
                 mode={state.mode}
                 focusedId={focusedId}
+                onDetails={openDetails}
               />
             </div>
           </section>
@@ -547,15 +485,9 @@ export default function PlanetsAndStarsExplorer() {
             </button>
             <div className="playback-label">
               <strong>Rotation</strong>
-              <span id="playback-state">
-                {state.playing
-                  ? "Playing at real relative speeds"
-                  : "Rotation paused"}
-              </span>
             </div>
-            <span className="playback-divider"></span>
             <label className="speed-control" htmlFor="speed">
-              <span>TIME SPEED</span>
+              <span className="sr-only">Rotation speed</span>
               <input
                 id="speed"
                 onChange={(event) =>
@@ -571,24 +503,22 @@ export default function PlanetsAndStarsExplorer() {
             </label>
             <button
               id="realtime"
+              aria-label="Reset to real time"
+              title="Reset to real time"
               onClick={() => {
                 update({ speed: 0 });
-                showToast("Real time: one second here is one second in space.");
               }}
               className="text-button"
             >
-              Real time
+              ↺
             </button>
-            <div className="playback-end">
-              <span className="status-dot"></span>3D EXPLORER
-            </div>
           </footer>
         </main>
       </div>
       <div id="toast" className={toast ? "show" : ""} role="status">
         {toast}
       </div>
-      <AboutDialog dialogRef={aboutRef} />
+      <AboutDialog dialogRef={aboutRef} body={byId[detailsId]} />
     </>
   );
 }

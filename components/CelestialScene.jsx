@@ -71,7 +71,7 @@ export default function CelestialScene({
             error
           ) : (
             <>
-              Preparing your universe<span>Loading surface maps</span>
+              Loading…
             </>
           )}
         </div>
@@ -82,7 +82,7 @@ export default function CelestialScene({
             <path d="M9 10V5a2 2 0 0 1 4 0v5M13 9a2 2 0 0 1 4 0v1a2 2 0 0 1 3 2v3c0 4-2 6-6 6-3 0-5-2-7-5l-3-4a2 2 0 0 1 3-2l2 2" />
           </svg>
           <span>
-            Drag to orbit <span>·</span> Scroll to zoom
+            Drag to orbit
           </span>
         </div>
         <div className="scale-ruler">

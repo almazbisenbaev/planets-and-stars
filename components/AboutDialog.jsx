@@ -1,6 +1,6 @@
-import { BODIES, diameterText } from "../lib/celestial-data.js";
+import { BODIES, byId, diameterText, periodText } from "../lib/celestial-data.js";
 
-export default function AboutDialog({ dialogRef }) {
+export default function AboutDialog({ dialogRef, body }) {
   function handleBackdrop(event) {
     if (event.target !== dialogRef.current) return;
     const bounds = event.target.getBoundingClientRect();
@@ -13,27 +13,26 @@ export default function AboutDialog({ dialogRef }) {
       dialogRef.current.close();
   }
   return (
-    <dialog id="about-dialog" ref={dialogRef} onClick={handleBackdrop}>
+    <dialog id="about-dialog" ref={dialogRef} onClick={handleBackdrop} aria-labelledby="data-panel-title">
       <div className="dialog-heading">
-        <span className="eyebrow">BEHIND THE COMPARISON</span>
+        <span className="eyebrow">{body ? body.kind : "Planets and Stars"}</span>
         <button
           id="close-about"
           onClick={() => dialogRef.current.close()}
-          aria-label="Close about dialog"
+          aria-label="Close data panel"
         >
           ×
         </button>
       </div>
-      <h2>
-        A little science.
-        <br />A lot of perspective.
-      </h2>
-      <p>
-        True scale preserves physical diameter ratios. An orthographic camera
-        avoids perspective size distortion. Objects are arranged for comparison;
-        their positions and spacing are not astronomical.
-      </p>
-      <h3>Sizes & rotation</h3>
+      <h2 id="data-panel-title">{body ? body.name : "Data & controls"}</h2>
+      {body ? <BodyFacts body={body} /> : (
+        <p>Compare physical diameters. Positions and spacing are illustrative.</p>
+      )}
+      <details className="data-section">
+        <summary>Sizes & rotation</summary>
+        <p>True scale preserves diameter ratios; equal size is for inspecting surfaces.
+          M and B abbreviate million and billion kilometres.</p>
+
       <p>
         Planet diameters are equatorial; flattening and axial tilts are
         included. Spin uses sidereal periods from{" "}
@@ -83,12 +82,14 @@ export default function AboutDialog({ dialogRef }) {
         illustrative surface maps and no simulated spin because a reliable
         period is not adopted here.
       </p>
-      <h3>Cosmic extremes & black holes</h3>
+      </details>
+      <details className="data-section">
+        <summary>Black holes & extremes</summary>
       <p>
         “Largest” and “smallest” are candidates, not settled records. Stellar
         radii depend on distance, atmosphere models and variability; black hole
         masses also have measurement uncertainty. Each new object has an adopted
-        estimate and source, available by selecting its comparison card.
+        estimate and source, available through Details.
       </p>
       <p>
         Black holes use the Schwarzschild reference horizon diameter,
@@ -99,8 +100,9 @@ export default function AboutDialog({ dialogRef }) {
         companion may instead have been a neutron star, in which case its
         displayed horizon would not apply.
       </p>
-      <details className="data-sources">
-        <summary>Measurements for the {BODIES.filter((body) => body.source).length} new objects</summary>
+      </details>
+      <details className="data-section data-sources">
+        <summary>Object sources</summary>
         <dl>
           {BODIES.filter((body) => body.source).map((body) => (
             <div key={body.id}>
@@ -114,7 +116,8 @@ export default function AboutDialog({ dialogRef }) {
           ))}
         </dl>
       </details>
-      <h3>Surface maps</h3>
+      <details className="data-section">
+        <summary>Surface maps & credits</summary>
       <p>
         Textures by{" "}
         <a
@@ -138,7 +141,9 @@ export default function AboutDialog({ dialogRef }) {
         for illustration. Lighting, atmosphere glow and stellar brightness are
         adjusted for visibility.
       </p>
-      <h3>Explore in 3D</h3>
+      </details>
+      <details className="data-section">
+        <summary>Controls</summary>
       <p>
         Drag to orbit in any direction, scroll or pinch to zoom, and right-drag
         or use two fingers to pan. Click a body or its comparison card to focus.
@@ -148,6 +153,30 @@ export default function AboutDialog({ dialogRef }) {
         them under Display settings. Very small objects retain their true sizes
         even below one pixel; select their cards to inspect them up close.
       </p>
+      </details>
     </dialog>
+  );
+}
+
+function BodyFacts({ body }) {
+  return (
+    <div className="body-facts">
+      <dl className="fact-grid">
+        <div><dt>{body.type === "black-hole" ? "Reference horizon" : "Diameter"}</dt><dd>{body.uncertain ? "≈ " : ""}{diameterText(body.diameter)}</dd></div>
+        <div><dt>Earth diameters</dt><dd>{(body.diameter / byId.earth.diameter).toLocaleString("en-US", { maximumSignificantDigits: 4 })}×</dd></div>
+        {body.type === "black-hole" ? (
+          <div><dt>Mass</dt><dd>≈ {body.solarMasses.toLocaleString("en-US")} Suns</dd></div>
+        ) : (
+          <>
+            <div><dt>Rotation</dt><dd>{periodText(body.period)}{body.period < 0 ? " · retrograde" : ""}</dd></div>
+            <div><dt>Axial tilt</dt><dd>{body.tilt == null ? "Not modeled" : `${body.tilt}°`}</dd></div>
+          </>
+        )}
+      </dl>
+      {body.note && <p>{body.note}</p>}
+      {body.illustrative && body.type !== "black-hole" && <p>Illustrative surface; rotation is not modeled.</p>}
+      {body.type === "black-hole" && <p>Nonrotating horizon model. The rim is a visibility guide; lensing and accretion are not simulated.</p>}
+      {body.source && <p><a href={body.source.url} target="_blank" rel="noreferrer">{body.source.label} ↗</a>{body.caveatSource && <> · <a href={body.caveatSource.url} target="_blank" rel="noreferrer">{body.caveatSource.label} ↗</a></>}</p>}
+    </div>
   );
 }
